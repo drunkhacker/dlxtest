@@ -1,0 +1,53 @@
+server:
+  port: 18888
+spring:
+  cloud:
+    stream:
+      bindings:
+        dlxTestOutput:
+          destination: 'mydelayedinput'
+          binder: rabbitmq
+        dlxTestOutput2:
+          destination: 'mydelayedinput'
+          binder: rabbitmq
+        dlxTestInput:
+          destination: mydelayedtopic
+          binder: rabbitmq
+          group: my.test.routing
+        dlxTestInput2:
+          destination: mydelayedtopic
+          binder: rabbitmq
+          group: your.test.routing
+      binders:
+        rabbitmq:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: localhost
+                port: 5672
+                virtual-host: /
+      rabbit:
+        bindings:
+          dlxTestOutput:
+            producer:
+              declare-exchange: false
+              binding-routing-key: "my.test.routing"
+              routing-key-expression: '''my.test.routing'''
+          dlxTestOutput2:
+            producer:
+              declare-exchange: false
+              binding-routing-key: "your.test.routing"
+              routing-key-expression: '''your.test.routing'''
+          dlxTestInput:
+            consumer:
+              declare-exchange: false
+              exchange-type: topic
+              binding-routing-key: my.test.routing
+              queue-name-group-only: true
+          dlxTestInput2:
+            consumer:
+              declare-exchange: false
+              exchange-type: topic
+              binding-routing-key: your.test.routing
+              queue-name-group-only: true
